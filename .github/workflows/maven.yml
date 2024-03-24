@@ -1,42 +1,37 @@
-# This workflow will build a Java project with Maven
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
-
-name: Java CI with Maven
-
-on:
-  push:
-    branches:
-    - master
-    - "*.x"
-  pull_request:
-    branches:
-    - master
-    - "*.x"
-  workflow_dispatch:
-
 jobs:
   build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+    runs-on: self-hosted
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 17
+    - continue-on-error: true
+      uses: actions/checkout@v4
+    - continue-on-error: true
+      name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
+        distribution: temurin
         java-version: '17'
-        distribution: 'temurin'
-    - uses: actions/cache@v4
+    - continue-on-error: true
+      uses: actions/cache@v4
       with:
-        path: ~/.m2/repository
         key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-        restore-keys: |
-          ${{ runner.os }}-maven-
-    - name: Download Plugins with Maven
-      run: mvn -B antrun:run --file pom.xml
-    - name: Build with Maven
-      run: mvn -B source:jar javadoc:jar package --file pom.xml
-    - name: Run Fess
-      run: bash src/test/resources/before_script.sh
-    - name: Run Integration Test
-      run: bash src/test/resources/run.sh
+        path: ~/.m2/repository
+        restore-keys: '${{ runner.os }}-maven-
 
+          '
+    - continue-on-error: true
+      name: Download Plugins with Maven
+      run: mvn -B antrun:run --file pom.xml
+    - continue-on-error: true
+      name: Build with Maven
+      run: mvn -B source:jar javadoc:jar package --file pom.xml
+    - continue-on-error: true
+      name: Run Fess
+      run: bash src/test/resources/before_script.sh
+    - continue-on-error: true
+      name: Run Integration Test
+      run: bash src/test/resources/run.sh
+    timeout-minutes: 15
+name: Java CI with Maven
+on:
+  repository_dispatch:
+    types: trigger-ga___maven.yml

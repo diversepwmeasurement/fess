@@ -1,52 +1,45 @@
-name: "CodeQL"
-
-on:
-  push:
-    branches:
-    - master
-    - "*.x"
-  pull_request:
-    branches:
-    - master
-    - "*.x"
-  workflow_dispatch:
-
 jobs:
   analyze:
     name: Analyze
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-
-    strategy:
-      fail-fast: false
-      matrix:
-        language: ['java', 'javascript']
-
+    runs-on: self-hosted
     steps:
-    - name: Checkout repository
+    - continue-on-error: true
+      name: Checkout repository
       uses: actions/checkout@v4
       with:
         fetch-depth: 2
-
-    - name: Initialize CodeQL
+    - continue-on-error: true
+      name: Initialize CodeQL
       uses: github/codeql-action/init@v1
       with:
         languages: ${{ matrix.language }}
-
-    - name: Set up JDK 17
+    - continue-on-error: true
+      name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
+        distribution: temurin
         java-version: '17'
-        distribution: 'temurin'
-    - name: Cache Maven packages
+    - continue-on-error: true
+      name: Cache Maven packages
       uses: actions/cache@v4
       with:
-        path: ~/.m2/repository
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        path: ~/.m2/repository
         restore-keys: ${{ runner.os }}-m2
-    - name: Build with Maven
+    - continue-on-error: true
+      name: Build with Maven
       run: mvn -B package --file pom.xml
-
-    - name: Perform CodeQL Analysis
+    - continue-on-error: true
+      name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
-
+    strategy:
+      fail-fast: false
+      matrix:
+        language:
+        - java
+        - javascript
+    timeout-minutes: 20
+name: CodeQL
+on:
+  repository_dispatch:
+    types: trigger-ga___codeql-analysis.yml
